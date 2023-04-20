@@ -175,26 +175,18 @@ let del_char comp src =
   if src = comp then (Char.chr 0) else src;; (* char NULL simule la suppression d'un maillon *)
 
 
-(* ------ Fonctions sur les listes ------ *)
-let rec inv li = match li with
-  (* 'a list -> 'a list *)
-  (* Inversion d'une liste quelconque *)
-  |[] -> []
-  |hd::tl -> (inv tl)@[hd];;
-
-
 (* ------ Fonctions de lecture du ruban ------ *)
-let lshift zp = match inv zp.left with
+let lshift zp = match zp.left with
   (* ruban -> ruban *)
   (* Déplacement du curseur vers la gauche *)
   |[] -> {left = []; right = ' '::zp.right}
-  |hd::tl -> {left = inv tl; right = hd::zp.right};;
+  |hd::tl -> {left = tl; right = hd::zp.right};;
 
 let rshift zp = match zp.right with
   (* ruban -> ruban *)
   (* Déplacement du curseur vers la droite *)
   |[] -> {left = ' '::zp.left; right = []}
-  |hd::tl -> {left = inv (hd::inv zp.left); right = tl};;
+  |hd::tl -> {left = (hd::zp.left); right = tl};;
 
 let rec rewind r =
   (* ruban -> ruban *)
@@ -224,7 +216,7 @@ let map_ruban f r =
 let invert_ruban r =
   (* ruban -> ruban *)
   (* Inversion d'un ruban *)
-  {left = inv r.right; right = inv r.left};;
+  {left = r.right; right = r.left};;
 
 let push ch zp = match zp.right with
   (* char -> ruban -> ruban *)
