@@ -152,9 +152,10 @@ let analyse_program file =
 type ruban = { left: char list; right: char list; };; (* zipper de char *)
 let nruban = {left = []; right = []};; (* ruban vide *)
 
-(* Fonctions sur les caractères *)
+(* ------ Fonctions sur les caractères ------ *)
 (* Ces fonctions sont utilisées dans les map *)
 let caesar off char =
+  (* int -> char -> char *)
   (* Effectue un codage de César de pas off sur le caractère char *)
   (* Le codage est appliqué sur le regex [a-zA-Z] *)
   let ascii_span = 26 (* Taille de l'alphabet *)
@@ -169,38 +170,45 @@ let caesar off char =
     Char.chr ((char_pos_min + off) mod ascii_span + Char.code 'a');; 
   
 let del_char comp src =
+  (* char -> char -> char *)
   (* Supprime src si src et comp sont les mêmes caractères *)
-  if src = comp then ' ' else src;;
+  if src = comp then (Char.chr 0) else src;; (* char NULL simule la suppression d'un maillon *)
 
-(* Fonctions sur les listes *)
+
+(* ------ Fonctions sur les listes ------ *)
 let rec inv li = match li with
+  (* 'a list -> 'a list *)
   (* Inversion d'une liste quelconque *)
   |[] -> []
   |hd::tl -> (inv tl)@[hd];;
 
 
-(* Fonctions de lecture du ruban *)
+(* ------ Fonctions de lecture du ruban ------ *)
 let lshift zp = match inv zp.left with
+  (* ruban -> ruban *)
   (* Déplacement du curseur vers la gauche *)
   |[] -> {left = []; right = ' '::zp.right}
   |hd::tl -> {left = inv tl; right = hd::zp.right};;
 
 let rshift zp = match zp.right with
+  (* ruban -> ruban *)
   (* Déplacement du curseur vers la droite *)
   |[] -> {left = ' '::zp.left; right = []}
   |hd::tl -> {left = inv (hd::inv zp.left); right = tl};;
 
 let rec rewind r =
+  (* ruban -> ruban *)
   (* Rembobinage d'un ruban *)
   if r.left = [] then r else rewind (lshift r);;             
 
 
   
 
-(* Fonctions d'édition directe du ruban *)
+(* ------ Fonctions d'édition directe du ruban ------ *)
 (* L'écriture se fait à droite *)
 (* On crée un nouveau maillon lorsqu'on est tout à droite *)
 let fold_ruban f v0 r =
+  (* ('a -> char -> 'a) -> 'a -> ruban -> 'a *)
   (* Application d'une fonction sur un ruban (fold) *)
   let rev_r = rewind r in
   let rec li_parser f v0 r =
@@ -209,19 +217,23 @@ let fold_ruban f v0 r =
   in li_parser f v0 rev_r.right;;
 
 let map_ruban f r =
+  (* (char -> char) -> ruban -> ruban *)
   (* Application d'une fonction sur un ruban (map) *)
   {left = List.map f r.left; right = List.map f r.right};;
 
 let invert_ruban r =
+  (* ruban -> ruban *)
   (* Inversion d'un ruban *)
   {left = inv r.right; right = inv r.left};;
 
 let push ch zp = match zp.right with
+  (* char -> ruban -> ruban *)
   (* Écriture d'un caractère sur la tête du ruban *)
   |[] -> {left = zp.left; right = [ch]}
   |hd::tl -> {left = zp.left; right = ch::tl};;
 
 let rec parse_instr q ins =
+  (* ruban -> instruction -> ruban *)
   (* Analyse d'une instruction unique et application de son effet sur le ruban *)
   match ins with 
     |Left -> lshift q
@@ -232,7 +244,7 @@ let rec parse_instr q ins =
       then begin
         match li with
         |[] -> q
-        |hd::tl -> parse_instr (parse_instr (parse_instr q hd) (Repeat(n,tl))) (Repeat(n-1,li)); end
+        |hd::tl -> parse_instr (parse_instr (parse_instr q hd) (Repeat(1,tl))) (Repeat(n-1,li)); end
       else q
     |Caesar(k) -> map_ruban (caesar k) q
     |Delete(ch) -> map_ruban (del_char ch) q
@@ -240,12 +252,14 @@ let rec parse_instr q ins =
                    
 
 let rec adv_prog zp prog =
+  (* ruban -> instruction list -> ruban *)
   (* Analyse d'une liste d'instructions *)
   match prog with
   |[] -> zp
   |hd::tl -> adv_prog (parse_instr zp hd) tl;;
            
 let execute_program p =
+  (* instruction list -> ruban *)
   (* Exécution d'un programme *)
   adv_prog nruban p;;
 
@@ -253,6 +267,7 @@ let execute_program p =
 
 
 let generate_program msg =
+  (* char list -> instruction list *)
   (* Conversion d'un message (liste de char) en programme 2A *)
   let rec construct_program msg prog =
     (* -AUXILIAR- Construction d'un programme 2A non optimisé *)
