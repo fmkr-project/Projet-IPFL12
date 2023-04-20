@@ -1,0 +1,29 @@
+.TH IIPFLE 6 "2023-04-20" "ENSIIE "IPFL12 22/23"
+.SH NAME
+main.bin \- utility tools for 2A & 3A programs
+.SH SYNOPSIS
+main.bin [1/2] [input.prog]
+.br
+main.bin 3 [message]
+.SH DESCRIPTION
+Modes 1 & 2 : this mode converts a 2A (mode 1) or 3A (mode 2) program into clear text.
+.br
+Mode 3 : this mode converts clear text into a 2A program.
+.br
+The result is output to the standard output.
+.SH EXAMPLES
+Example files are provided in the ./tests directory :
+.br
+	invert.prog        ) for testing the invert function
+.br
+	rep.prog           ) for testing the repeat function
+.br
+	delete.prog        ) for testing the delete & repeat functions
+.br
+	message_3aien.prog ) 2nd part introductive message
+.br
+	lorem, lorem.prog  ) conversion of plain text into 2A
+.SH BUGS
+none?
+.SH LICENCE
+feur
